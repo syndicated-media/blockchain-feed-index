@@ -4,7 +4,7 @@ const ExtractTextWebpackPlugin = require ('extract-text-webpack-plugin')
 const Html = require ('html-webpack-plugin');
 
 var plugins = [new Html({
-  filename: 'index.html',
+  filename: './index.html',
   template: './main.html'
 })];
 
