@@ -6,8 +6,6 @@ const path = require ('path');
 
 function responseMiddleware (fs) {
   return function (req, res) {
-    console.log(fs);
-    console.log(fs.readFileSync);
     let html = fs.readFileSync(path.resolve(__dirname, 'dist', 'index.html'));
     res.send(html.toString());
   }

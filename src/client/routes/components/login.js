@@ -2,6 +2,10 @@ import React from 'react';
 
 export default React.createClass({
   render () {
-    return <div>TEST!</div>
+    return (
+      <div>
+        <div>LOGIN</div>
+      </div>
+    );
   }
-});
+})
