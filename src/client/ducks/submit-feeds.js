@@ -62,15 +62,15 @@ export function postFeeds (feeds) {
     dispatch(init(feeds));
     dispatch(retrieveFroBlocktchain());
 
-    fetch ('/postchain', {
-      method: 'POST',
+    fetch ('/api/podcasts', {
+      method: 'GET',
       body: JSON.stringify(feeds)
     })
       .then(response => {
         feeds = removeDuplicates(feeds, response.json());
 
         dispatch(validate());
-        fetch ('/validate', {
+        fetch ('/api/validate', {
           method: 'POST',
           body: JSON.stringify(feeds)
         })
@@ -79,7 +79,7 @@ export function postFeeds (feeds) {
             feeds = addMetaData(feeds, response.json());
 
             dispatch(postToBlockchain);
-            fetch('/submit', {
+            fetch('/api/podcasts', {
               method: 'POST',
               body: json.stringify(feeds)
             })
