@@ -1,10 +1,10 @@
 import {combineReducers} from 'redux';
 import profile from './profile';
-import submitFeeds from './submit-feeds';
+import submit from './submit';
 
 const reducer = combineReducers({
   profile,
-  submitFeeds
+  submit
 });
 
 export default reducer;

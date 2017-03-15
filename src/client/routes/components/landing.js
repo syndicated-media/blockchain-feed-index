@@ -1,5 +1,6 @@
 import React from 'react';
 import {Link} from 'react-router';
+import Submit from '../../components/submit';
 
 export default React.createClass({
   render () {
@@ -7,6 +8,7 @@ export default React.createClass({
       <div>
         <div>LANDING</div>
         <Link to="/login">Login</Link>
+        <Submit/>
       </div>
     );
   }
