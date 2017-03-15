@@ -136,15 +136,51 @@ function error (response) {
 // helpers
 
 function urlsAsArray (urls) {
+  // get as array
   if (!Array.isArray(urls)) {
-    urls = urls.split(' ');
+    let splitChar = ' ';
+    if (urls.indexOf(',') !== -1) {
+      splitChar = ',';
+    }
+
+    urls = urls.split(splitChar);
   }
+
+  // remove white space
+  urls = urls.map (url => {
+    return url.trim();
+  });
+
+  // only return that has length
+  urls = urls.filter (url => {
+    return url.length > 0;
+  });
+
   return urls;
 }
 
 function cleanUrls (urls) {
-  // TODO
-  return urls;
+  return urls.map (url => {
+    // remove protocol
+    let i = url.indexOf('://');
+    if (i > -1 && i < 6) {
+      url = url.slice(i + 3);
+    }
+
+    // remove query
+    i = url.indexOf('?');
+    if (i > -1) {
+      url = url.slice(0, i);
+    }
+
+    // remove trailing slash
+    i = url.lastIndexOf('/');
+    if (i === url.length - 1) {
+      url = url.slice(0, url.length - 1);
+    }
+
+    return url;
+  });
 }
 
 function removeAlreadyInPodchain (urls) {
@@ -154,7 +190,7 @@ function removeAlreadyInPodchain (urls) {
 
 function removeInvalidAndAddMetaData (results) {
   let onlyValidUrls = [];
-  result.forEach ((result, index) => {
+  results.forEach ((result, index) => {
     if (result.valid) {
       onlyValidUrls.push ({
         url: result.url,
