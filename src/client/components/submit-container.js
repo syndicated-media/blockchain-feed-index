@@ -1,7 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import {submit} from '../ducks/submit';
-import {Submit} from './submit';
+import Submit from './submit';
 
 const mapStateToProps = (state) => {
   let submit = state.submit;
