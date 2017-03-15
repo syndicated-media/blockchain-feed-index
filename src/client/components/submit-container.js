@@ -7,16 +7,17 @@ const mapStateToProps = (state) => {
   let submit = state.submit;
   return {
     urls: submit.urls,
-    submitting: submit.isGettingUrls || submit.isValidatingUrls || submit.isPostingUrls,
-    complete: submit.complete,
-    error: submit.error,
+    isSubmitting: submit.isGettingUrls || submit.isValidatingUrls || submit.isPostingUrls,
+    isComplete: submit.isComplete,
+    isError: submit.isError,
+    response: submit.response
   };
 }
 
 const mapDispatchToProps  = (dispatch) => {
   return {
     onSubmit: (urls) => {
-      dispatch (submit(urls));
+      dispatch (submit (urls));
     }
   };
 }

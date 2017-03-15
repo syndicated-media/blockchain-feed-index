@@ -8,8 +8,6 @@ module.exports = (req, res) => {
     urls = [urls];
   }
 
-console.log(urls);
-
   validate (urls)
     .then (result => {
       res.status (200).json (result);

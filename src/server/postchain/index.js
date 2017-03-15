@@ -10,13 +10,16 @@ class PostchainClient {
   getUrl (url) {
     return new Promise ((resolve, reject) => {
       setTimeout (() => {
-        resolve ({
-          id: UUID (),
-          publicKey: UUID (),
-          feedUrl: url,
-          title: 'Some podcast title',
-          email: 'some@email.com'
-        });
+        Math.random() < 0.2 ?
+          resolve ({
+            id: UUID (),
+            publicKey: UUID (),
+            feedUrl: url,
+            title: 'Some podcast title',
+            email: 'some@email.com'
+          })
+          :
+          resolve({});
       }, 100);
     });
   }

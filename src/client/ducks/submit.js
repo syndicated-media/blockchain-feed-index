@@ -12,8 +12,7 @@ const initalState = {
     isValidatingUrls: false,
     isPostingUrls: false,
     isComplete: false,
-    isError: false,
-    error: ''
+    isError: false
 };
 
 export default function reducer (state = initalState, action = {}) {
@@ -27,32 +26,57 @@ export default function reducer (state = initalState, action = {}) {
     case GET_FROM_PODCHAIN:
       return {
         ...state,
-        isGettingUrls: true
+        isGettingUrls: true,
+        isValidatingUrls: false,
+        isPostingUrls: false,
+        isComplete: false
       };
 
     case VALIDATE:
       return {
         ...state,
-        isValidatingUrls: true
+        isGettingUrls: false,
+        isValidatingUrls: true,
+        isPostingUrls: false,
+        isComplete: false
       };
 
     case POST_TO_PODCHAIN:
       return {
         ...state,
-        isPostingUrls: true
+        isGettingUrls: false,
+        isValidatingUrls: false,
+        isPostingUrls: true,
+        isComplete: false
       };
 
     case COMPLETE:
       return {
         ...state,
+        isGettingUrls: false,
+        isValidatingUrls: false,
+        isPostingUrls: false,
         isComplete: true,
+        isError: false,
         response: action.response
       };
 
+    case ERROR:
+      return {
+        ...state,
+        isGettingUrls: false,
+        isValidatingUrls: false,
+        isPostingUrls: false,
+        isComplete: true,
+        isError: true,
+        response: action.response
+      };
     default:
       return state;
   }
 }
+
+// top level action creator
 
 export function submit (urls) {
   return dispatch => {
@@ -63,31 +87,39 @@ export function submit (urls) {
     dispatch (getFromPodchain ());
 
     fetch ('/api/podcasts?q=' + urls.join (','))
+      .then (response => response.json())
       .then (response => {
-        urls = removeAlreadyInPodchain (urls, response.json());
+        //urls = removeAlreadyInPodchain (urls, response);
 
-        dispatch (validate ());
-        fetch ('/api/validate', {
-          method: 'POST',
-          body: JSON.stringify (urls)
-        })
-          .then (response => {
-            urls = removeInvalidAndAddMetaData (response.json());
+        if (urls.length) {
+          dispatch (validate ());
+          fetch ('/api/validate?q=' + urls.join(','))
+            .then (response => response.json())
+            .then (response => {
+              urls = removeInvalidAndAddMetaData (response.urls);
 
-            dispatch (postToBlockchain);
-            fetch ('/api/podcasts', {
-              method: 'POST',
-              body: JSON.stringify({
-                urls: urls
-              })
-            })
-              .then (response => {
-                dispatch (complete (response.json ()));
-              })
-          })
+              if (urls.length) {
+                dispatch (postToBlockchain);
+                fetch ('/api/podcasts', {
+                  method: 'POST',
+                  body: {
+                    urls: urls
+                  }
+                })
+                  .then (response => response.json())
+                  .then (response => {
+                    dispatch (complete ('Podcast(s) succesfully submitted'));
+                  })
+              } else {
+                dispatch (complete ('No valid podcast(s) to submit'));
+              }
+            });
+        } else {
+          dispatch (complete ('Podcast(s) already in Podchain'));
+        }
       })
-      .catch(error => {
-        dispatch (error (error.json ()));
+      .catch(response => {
+        dispatch (error (JSON.stringify(response)));
       });
   }
 }
@@ -129,7 +161,7 @@ function complete (response) {
 function error (response) {
   return {
     type: ERROR,
-    error: response
+    response: response
   };
 }
 
@@ -183,15 +215,19 @@ function cleanUrls (urls) {
   });
 }
 
-function removeAlreadyInPodchain (urls) {
-  // TODO
-  return urls;
+function removeAlreadyInPodchain (urls, inPodchain) {
+  return urls.filter (url => {
+    let found = inPodchain.find (data => {
+      return data.feedUrl === url;
+    });
+    return found !== undefined ? false : true;
+  });
 }
 
 function removeInvalidAndAddMetaData (results) {
   let onlyValidUrls = [];
   results.forEach ((result, index) => {
-    if (result.valid) {
+    if (true) {//result.valid) {
       onlyValidUrls.push ({
         url: result.url,
         title: result.title,
