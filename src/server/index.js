@@ -6,7 +6,9 @@ const validate = require ('./routers/validate');
 
 let router = express.Router();
 
+router.use(bodyParser.urlencoded({extended: false}));
 router.use(bodyParser.json());
+
 router.all('/api/podcasts', podcasts);
 router.get('/api/validate', validate);
 router.use(error);

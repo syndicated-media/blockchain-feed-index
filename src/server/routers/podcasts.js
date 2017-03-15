@@ -36,7 +36,7 @@ function postPodcasts (req, res) {
   if (!Array.isArray(urls)) {
     urls = [urls]
   }
-console.log("POSTING THIS: ", req.body);
+console.log("Got this: ", req.body);
   podcasts.post (urls)
     .then (result => {
       res.json(result);
