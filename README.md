@@ -13,4 +13,4 @@ This is a proof-of-concept showing how the Podchain can work. The aim is to crea
 If you want to contribute, please use git flow and PRs.
 
 ## Technology Used
-Node.js, React, Postchain
+Node.js, React, Redux, Postchain
