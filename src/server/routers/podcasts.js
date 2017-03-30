@@ -1,19 +1,20 @@
 // map podcast request to controller
 
-const podcasts = require ('../controllers/podcasts');
+const podcasts = require('../controllers/podcasts');
+const validate = require('../controllers/validate');
 
 module.exports = (req, res) => {
   switch (req.method) {
     case 'GET':
-      getPodcasts (req, res);
+      getPodcasts(req, res);
       break;
 
     case 'POST':
-      postPodcasts (req, res);
+      postPodcasts(req, res);
       break;
 
     default:
-      throw new Error ('Unsupported method');
+      throw new Error('Unsupported method');
   }
 }
 
@@ -25,9 +26,9 @@ function getPodcasts (req, res) {
     urls = [urls];
   }
 
-  podcasts.get (urls)
-    .then (result => {
-      res.json (result);
+  podcasts.get(urls)
+    .then(result => {
+      res.json(result);
     });
 }
 
@@ -36,9 +37,24 @@ function postPodcasts (req, res) {
   if (!Array.isArray(urls)) {
     urls = [urls]
   }
-console.log("Got this: ", req.body);
-  podcasts.post (urls)
-    .then (result => {
+
+  validate(urls)
+    .then(result => {
+      let validUrls = [];
+      result.urls.forEach(item => {
+        if (item.valid) {
+          validUrls.push(item);
+        }
+      });
+
+      if (validUrls.length) {
+        return validUrls;
+      } else {
+        res.status(415).send();
+      }
+    })
+    .then(podcasts.post)
+    .then(result => {
       res.json(result);
     });
 }

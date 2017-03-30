@@ -97,9 +97,7 @@ export function submit (urls) {
             .then (response => response.json())
             .then (response => {
               urls = removeInvalidAndAddMetaData (response.urls);
-console.log("Posting:", JSON.stringify({
-  urls
-}));
+
               if (urls.length) {
                 dispatch (postToBlockchain);
                 fetch ('/api/podcasts', {
