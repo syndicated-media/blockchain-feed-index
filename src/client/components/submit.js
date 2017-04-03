@@ -32,7 +32,7 @@ export default class Submit extends React.Component {
 
     return (
       <div>
-        <div>Submit your podcast(s)</div>
+        <h2>Submit your podcast(s)</h2>
         <form onSubmit={this.onSubmit}>
           <input {...disabled} type="text" value={this.state.value} onChange={this.onChange} placeholder="Enter full podcast URL here..." />
           <br/>

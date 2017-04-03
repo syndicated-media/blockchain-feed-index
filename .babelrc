@@ -1,3 +1,4 @@
 {
-  "presets": ["react", "env", "stage-1"] 
+  "plugins": ["version-inline", "transform-css-import-to-string", "babel-plugin-stylus-compiler"],
+  "presets": ["react", "env", "stage-1", "es2015"]
 }
