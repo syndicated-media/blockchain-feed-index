@@ -56,10 +56,13 @@ export default function reducer (state = initalState, action = {}) {
 }
 
 export function login () {
-  authService.login();
   return {
     type: LOGIN
   };
+}
+
+export function launchAuth0Login () {
+  authService.login();
 }
 
 export function loggedIn () {

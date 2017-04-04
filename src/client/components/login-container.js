@@ -1,6 +1,6 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import {login, logout} from '../ducks/profile';
+import {login, launchAuth0Login, logout} from '../ducks/profile';
 import Login from './login';
 
 const mapStateToProps = (state) => {
@@ -13,6 +13,7 @@ const mapDispatchToProps  = (dispatch) => {
   return {
     onLogin: () => {
       dispatch(login());
+      launchAuth0Login();
     },
     onLogout: () => {
       dispatch(logout());

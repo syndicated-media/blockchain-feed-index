@@ -1,12 +1,11 @@
 import Auth0Lock from 'auth0-lock'
-import {browserHistory} from 'react-router'
-import {authenticate as dispatchAuthenticate} from '../ducks/profile';
+import {authenticate} from '../ducks/profile';
 
 export default class AuthService {
   constructor (clientId, domain) {
     this.lock = new Auth0Lock(clientId, domain, {
       auth: {
-        redirectUrl: 'http://localhost:8000/authenticate',
+        redirectUrl: 'http://localhost:8000/profile',
         responseType: 'token'
       }
     });
@@ -15,10 +14,11 @@ export default class AuthService {
     this.login = this.login.bind(this);
   }
 
-  _doAuthentication (authResult) {
-    this.setToken(authResult.idToken);
-    dispatchAuthenticate(authResult);
-    browserHistory.replace('/profile');
+  _doAuthentication (auth) {
+    this.setToken(auth.idToken);
+
+    let store = require('../store').default;
+    store.dispatch(authenticate(auth));
   }
 
   login () {
