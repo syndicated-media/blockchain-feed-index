@@ -1,71 +1,49 @@
 const secp256k1 = require('secp256k1');
+const crypto = require('crypto');
 
 const restClient = require('postchain-client').restClient;
 const gtxClient = require('postchain-client').gtxClient;
 
-// mock
-const UUID = require('uuid4');
 class PostchainClient {
     setEndpointBase(url) {
         //`http://35.157.104.6/podchain/2/`
         let rest = restClient.createRestClient(url);
-        this.gtx = gtxClient.createClient(rest, ['newUrl', 'transferUrl', 'changeUrl']);
+        this.gtx = gtxClient.createClient(rest, ['newUrl', 'transferUrl', 'changeUrl', 'deleteUrl']);
     }
 
-    create(url, title, email, consortiumPrivateKey, podcasterPrivateKey) {
+    create(url, title, email, consortiumPrivateKey, podcasterPublicKey) {
         const consortiumPublicKey = secp256k1.publicKeyCreate(consortiumPrivateKey);
-        const podcasterPublicKey = secp256k1.publicKeyCreate(podcasterPrivateKey);
 
-        // If CM assigns ownership to itself we only require
-        // one signature. It's unneccesary to make two
-        // equal signatures.
-        let signers = [consortiumPublicKey];
-        if (!consortiumPublicKey.equals(podcasterPublicKey)) {
-            signers.push(podcasterPublicKey);
-        }
-
-        let req = this.gtx.newRequest(signers);
+        let req = this.gtx.newRequest([consortiumPublicKey]);
         req.newUrl(url, title, email, podcasterPublicKey, consortiumPublicKey);
         req.sign(consortiumPrivateKey);
         return this.send(req, url, result => result && result.length === 1);
     }
 
     getByPublicKey(publicKey) {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                Math.random() < 0.5 ?
-                    resolve({
-                        id: UUID(),
-                        publicKey: publicKey,
-                        feedUrl: 'http://some.url.com',
-                        title: 'Some podcast title',
-                        email: 'some@email.com',
-                        deleted: false
-                    })
-                    :
-                    reject();
-            }, 100);
-        });
+        return query({type: "getPodcastsByOwner", url: publicKey.toString('hex')},
+            result => result.map(podcast => podcastObject(podcast)));
     }
 
     getByUrl(url) {
+        return query({type: "getPodcastByUrl", url: url}, result => singleResult(result))
+    }
+
+    query(queryObject, resultHandler) {
         return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                Math.random() < 0.5 ?
-                    resolve({
-                        id: UUID(),
-                        publicKey: UUID(),
-                        feedUrl: url,
-                        title: 'Some podcast title',
-                        email: 'some@email.com',
-                        deleted: false
-                    })
-                    :
-                    reject();
-            }, 100);
+            this.gtx.query(queryObject,
+                (error, result) => {
+                    if (error) {
+                        console.log(error);
+                        reject(error);
+                        return;
+                    }
+                    resolve(resultHandler(result));
+                });
         });
     }
 
+    // The consortiumPrivateKey is not needed here. You can remore that parameter
     update(oldUrl, newUrl, newTitle, newEmail, consortiumPrivateKeyUnusedDELETE, podcasterPrivateKey) {
         const podcasterPublicKey = secp256k1.publicKeyCreate(podcasterPrivateKey);
 
@@ -91,34 +69,28 @@ class PostchainClient {
         return this.send(req, newUrl, condition);
     }
 
-    transfer(url, oldPrivateKey, newPrivateKey) {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                resolve({
-                    id: UUID(),
-                    publicKey: newPrivateKey,
-                    feedUrl: url,
-                    title: 'Some podcast title',
-                    email: 'some@email.com',
-                    deleted: false
-                });
-            }, 100);
-        });
+    // I changed newPrivateKey->newOwnerPublicKey because
+    // the new owner doesn't have to sign /Kalle
+    transfer(url, oldOwnerPrivateKey, newOwnerPublicKey) {
+        const oldPublicKey = secp256k1.publicKeyCreate(oldOwnerPrivateKey);
+        let req = this.gtx.newRequest([oldPublicKey]);
+        req.transferUrl(url, Buffer.from(newOwnerPublicKey, 'hex'));
+        req.sign(oldOwnerPrivateKey);
+        var condition = (result) => {
+            if (!result || result.length != 1) {
+                return false;
+            }
+            return result[0].owner === newOwnerPublicKey.toString('hex');
+        }
+        return this.send(req, url, condition);
     }
 
-    delete(url, consortiumPrivateKey, podcasterPrivateKey) {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                resolve({
-                    id: UUID(),
-                    publicKey: UUID(),
-                    feedUrl: url,
-                    title: 'Some podcast title',
-                    email: 'some@email.com',
-                    deleted: true
-                });
-            }, 100);
-        });
+    delete(url, ownerPrivateKey) {
+        const ownerPublicKey = secp256k1.publicKeyCreate(ownerPrivateKey);
+        let req = this.gtx.newRequest([ownerPublicKey]);
+        req.deleteUrl(url);
+        req.sign(ownerPrivateKey);
+        return this.send(req, url, result => result && result.length === 0);
     }
 
     send(req, urlToFollFor, pollCondition) {
@@ -128,18 +100,10 @@ class PostchainClient {
                     console.log(error);
                     reject(error);
                 }
-                let queryObject = {type: "getPodcast", url: urlToFollFor};
+                let queryObject = {type: "getPodcastByUrl", url: urlToFollFor};
                 this.queryUntilCondition(queryObject, pollCondition)
                     .then(queryResult => {
-                        let pod = queryResult[0];
-                        resolve({
-                            id: pod.id,
-                            publicKey: pod.owner,
-                            feedUrl: pod.url,
-                            title: pod.title,
-                            email: pod.email,
-                            deleted: pod.deleted
-                        });
+                        resolve(singleResult(queryResult))
                     }, error => {
                         console.log(error);
                         reject(error);
@@ -150,6 +114,7 @@ class PostchainClient {
 
     queryUntilCondition(queryObject, condition) {
         return new Promise((resolve, reject) => {
+            var timeout = Date.now() + 10000; // Ten seconds timeout
             let resultHandler = (error, result) => {
                 if (error) {
                     console.error(error);
@@ -157,6 +122,10 @@ class PostchainClient {
                     return;
                 }
                 if (!condition(result)) {
+                    if (Date.now() > timeout) {
+                        reject(new Error("timeout"));
+                        return;
+                    }
                     // Poll every 2 seconds
                     console.log("Condition not met yet, retrying in 2 seconds");
                     setTimeout(() => this.gtx.query(queryObject, resultHandler), 2000);
@@ -168,8 +137,88 @@ class PostchainClient {
             this.gtx.query(queryObject, resultHandler);
         });
     }
+
+    /**
+     * This is an illustration of external signing of a podchain transaction
+     *
+     * There are two variants: One where this service knows the public key
+     * of the podcaster, and one where it is unknown. The difference between the
+     * two cases are that in the latter you first need to query podchain to get the owner.
+     *
+     * This illustrates the case where we DO know the owner, so we don't have to look it up.
+     */
+    illustrationDeleteFunctionForExternalSigning(url, ownerPublicKey) {
+        let req = this.gtx.newRequest([ownerPublicKey]);
+        req.deleteUrl(url);
+        var bufferToSign = req.getBufferToSign();
+        // First get somebody to sign this buffer.
+        return someExternalActorSignsThisBufferInHerWebBrowserAndReturnsTheSignature(bufferToSign)
+        // then add the signature to the request and send the request.
+            .then((signature) => {
+                req.addSignature(ownerPublicKey, signature);
+                return this.send(req, url, result => result && result.length === 0);
+            });
+    }
+
+    /**
+     * Another approach is a two-step process:
+     * 1. Get the bufferToSign
+     */
+    illustrateGetDeleteRequestBufferToSign(url, ownerPublicKey) {
+        let req = this.gtx.newRequest([ownerPublicKey]);
+        req.deleteUrl(url);
+        return req.getBufferToSign();
+    }
+    /**
+     * 2. Recreate the transaction when the user have signed the message.
+     */
+    illustrateGetDeleteFinalize(url, ownerPublicKey, signature) {
+        let req = this.gtx.newRequest([ownerPublicKey]);
+        req.deleteUrl(url);
+        req.addSignature(ownerPublicKey, signature);
+        return this.send(req, url, result => result && result.length === 0);
+    }
 }
 
+function sha256(buffer) {
+    return crypto.createHash('sha256').update(buffer).digest()
+}
+function hash256(buffer) {
+    return sha256(sha256(buffer))
+}
+function someExternalActorSignsThisBufferInHerWebBrowserAndReturnsTheSignature(bufferToSign) {
+    return new Promise((resolve, reject) => {
+        // This code is run in someone's web browser.
+        // Dummy private key that will generate a bad signature but you get the picture
+        var privKey = Buffer.alloc(32);
+        var digestBuffer = hash256(content);
+        return secp256k1.sign(digestBuffer, privKey).signature;
+    });
+}
+
+function singleResult(queryResult) {
+    if (!queryResult) {
+        throw new Error("queryResult was null");
+    }
+    if (queryResult.length > 1) {
+        throw new Error("Too many results, expected at most 1");
+    }
+    if (queryResult.length === 0) {
+        return null;
+    }
+    return podcastObject(queryResult[0]);
+}
+
+function podcastObject(pod) {
+    return {
+        id: pod.id,
+        publicKey: pod.owner,
+        feedUrl: pod.url,
+        title: pod.title,
+        email: pod.email,
+        deleted: pod.deleted
+    };
+}
 
 let client = new PostchainClient();
 client.setEndpointBase('http://35.157.104.6/podchain/2/');
