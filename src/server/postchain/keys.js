@@ -1,4 +1,4 @@
 module.exports = {
-  public: '123123123123123',
-  private: 'this is acasts private key'
+  public: Buffer.from('0350fe40766bc0ce8d08b3f5b810e49a8352fdd458606bd5fafe5acdcdc8ff3f57', 'hex'),
+  private: Buffer.from('3132333435363738393031323334353637383930313233343536373839303131', 'hex')
 };

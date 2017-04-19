@@ -47,7 +47,7 @@ function handlePOST (req, res) {
   let currentUrl = body.currentUrl || body.currenturl;
   let method = body.method;
   let privateKey = body.privateKey || body.privatekey || body.key;
-
+  let newOwnerPublicKey = body.newOwnerPublicKey;
   if (typeof method === 'undefined' || typeof urls === 'undefined') {
     res.status(400).send();
     return;
@@ -81,7 +81,7 @@ function handlePOST (req, res) {
           return podcasts.update(currentUrl, urls[0].url, urls[0].title, urls[0].email, privateKey);
 
         case 'transfer':
-          return podcasts.transfer(urls[0].url, privateKey);
+          return podcasts.transfer(urls[0].url, newOwnerPublicKey);
 
         case 'delete':
           return podcasts.del(urls[0].url, privateKey);

@@ -1,10 +1,10 @@
 const postchain = require ('../postchain');
 const keys = require ('../postchain/keys');
 
-const create = (urls, privateKey) => {
+const create = (urls, newOwnerPublicKey) => {
   let promises = [];
   urls.forEach (data => {
-    promises.push (postchain.create(data.url, data.title, data.email, keys.private, privateKey || keys.private));
+    promises.push (postchain.create(data.url, data.title, data.email, keys.private, newOwnerPublicKey || keys.public));
   });
 
   return Promise.all (promises);
@@ -22,7 +22,7 @@ const getByUrls = urls => {
 
 const update = (currentUrl, url, title, email, privateKey) => postchain.update(currentUrl, url, title, email, keys.private, privateKey || keys.private);
 const del = (url, privateKey) => postchain.delete(url, privateKey || keys.private);
-const transfer = (url, privateKey) => postchain.transfer(url, keys.private, privateKey);
+const transfer = (url, newOwnerPublicKey) => postchain.transfer(url, keys.private, newOwnerPublicKey);
 
 module.exports = {
   create,
