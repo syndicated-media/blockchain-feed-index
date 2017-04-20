@@ -24,7 +24,7 @@ function handleGET (req, res) {
   if (query.key || query.publickey) {
     let publicKey = query.key || query.publickey;
     podcasts.getByPublicKey(publicKey)
-      .then(res.json)
+      .then(result => res.json(result))
       .catch(err => res.status(404).send());
   } else if (query.url || query.urls) {
     let urls = req.query.url || req.query.urls;
