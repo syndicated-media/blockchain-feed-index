@@ -2,6 +2,7 @@
 
 const podcasts = require('../controllers/podcasts');
 const validate = require('../controllers/validate');
+const log = require('../services/log');
 
 module.exports = (req, res) => {
   switch (req.method) {
@@ -32,16 +33,21 @@ function handleGET (req, res) {
     } else {
       urls = [urls];
     }
-
+    log(urls);
     podcasts.getByUrls(urls)
-      .then(res.json)
-      .catch(err => res.status(404).send());
+      .then(result => res.json(result))
+      .catch(err => {
+        console.log(err);
+        res.status(404).send()
+      });
   } else {
     res.status(400).send();
   }
 }
 
 function handlePOST (req, res) {
+  log('POST');
+
   let body = req.body;
   let urls = body.urls || body.url || body.newUrl || body.url;
   let currentUrl = body.currentUrl || body.currenturl;
@@ -62,7 +68,10 @@ function handlePOST (req, res) {
       let validUrls = [];
       result.urls.forEach(item => {
         if (item.valid) {
+          log(' valid: ' + item.url);
           validUrls.push(item);
+        } else {
+          log(' invalid: ' + item.url);
         }
       });
 
@@ -73,6 +82,7 @@ function handlePOST (req, res) {
       }
     })
     .then(urls => {
+      log (' method: ' + method);
       switch (method.toLowerCase()) {
         case 'create':
           return podcasts.create(urls, privateKey);

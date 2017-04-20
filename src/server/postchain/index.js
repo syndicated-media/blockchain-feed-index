@@ -21,12 +21,12 @@ class PostchainClient {
     }
 
     getByPublicKey(publicKey) {
-        return query({type: "getPodcastsByOwner", url: publicKey.toString('hex')},
+        return this.query({type: "getPodcastsByOwner", url: publicKey.toString('hex')},
             result => result.map(podcast => podcastObject(podcast)));
     }
 
     getByUrl(url) {
-        return query({type: "getPodcastByUrl", url: url}, result => singleResult(result))
+        return this.query({type: "getPodcastByUrl", url: url}, result => singleResult(result))
     }
 
     query(queryObject, resultHandler) {

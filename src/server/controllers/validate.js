@@ -1,5 +1,6 @@
 const request = require ('request');
 const FeedParser = require ('feedparser');
+const log = require('../services/log');
 
 module.exports = urls => {
   var response = {
@@ -31,6 +32,7 @@ const validate = (urls, response, resolve, reject) => {
 
 const validateOne = url => {
   return new Promise ((resolve, reject) => {
+    log(' validating: ' + url);
     let feedparser = new FeedParser();
     let result = {};
 
