@@ -21,7 +21,13 @@ class PostchainClient {
     }
 
     get (count, fromId) {
-      console.log("Count and from", count, fromId);
+        if (count !== undefined) {
+          count = parseInt(count);
+        }
+        if (fromId !== undefined) {
+          fromId = parseInt(fromId);
+        }
+
         return this.query({type: 'get', count: count, fromId: fromId},
             result => result.map(podcast => podcastObject(podcast)));
     }
