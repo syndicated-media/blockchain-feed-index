@@ -24,17 +24,18 @@ export default class Submit extends React.Component {
 
   render () {
     let disabled = {};
-    if (this.props.isSubmitting) {
+    if (this.props.isPostingUrls) {
         disabled = {
           disabled: 'disabled'
         };
     }
+    let value = this.props.isComplete ? '' : this.state.value;
 
     return (
       <div>
         <h2>Submit your podcast(s)</h2>
         <form onSubmit={this.onSubmit}>
-          <input {...disabled} type="text" value={this.state.value} onChange={this.onChange} placeholder="Enter full podcast URL here..." />
+          <input {...disabled} type="text" value={value} onChange={this.onChange} placeholder="Enter full podcast URL here..." />
           <br/>
           <input {...disabled} type="submit" value="Submit" />
         </form>
@@ -44,15 +45,15 @@ export default class Submit extends React.Component {
   }
 
   get progress() {
-    let {isSubmitting, isComplete, isError, response} = this.props;
+    let {isPostingUrls, isComplete, isError, response} = this.props;
 
-    if (!isSubmitting && !isComplete && !isError) {
+    if (!isPostingUrls && !isComplete && !isError) {
       return '';
     }
-    if (isSubmitting && !isComplete && !isError) {
+    if (isPostingUrls && !isComplete && !isError) {
       return 'Submitting...';
     }
-    if (isSubmitting && isComplete && !isError) {
+    if (isComplete && !isError) {
       return response;
     }
     if (isError) {

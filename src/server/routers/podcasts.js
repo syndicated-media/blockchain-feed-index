@@ -3,6 +3,9 @@
 const podcasts = require('../controllers/podcasts');
 const validate = require('../controllers/validate');
 const log = require('../services/log');
+const NoValidUrls = {
+  message: "No valid urls"
+};
 
 module.exports = (req, res) => {
   switch (req.method) {
@@ -33,21 +36,23 @@ function handleGET (req, res) {
     } else {
       urls = [urls];
     }
-    log(urls);
     podcasts.getByUrls(urls)
       .then(result => res.json(result))
       .catch(err => {
-        console.log(err);
+        log.error(err);
         res.status(404).send()
       });
   } else {
-    res.status(400).send();
+    podcasts.get(query.count, query.from)
+      .then(result => res.json(result))
+      .catch(err => {
+        log.error(err);
+        res.status(500).send();
+      })
   }
 }
 
 function handlePOST (req, res) {
-  log('POST');
-
   let body = req.body;
   let urls = body.urls || body.url || body.newUrl || body.url;
   let currentUrl = body.currentUrl || body.currenturl;
@@ -71,14 +76,14 @@ function handlePOST (req, res) {
           log(' valid: ' + item.url);
           validUrls.push(item);
         } else {
-          log(' invalid: ' + item.url);
+          log.error(' invalid: ' + item.url);
         }
       });
 
       if (validUrls.length) {
         return validUrls;
       } else {
-        res.status(415).send();
+        throw NoValidUrls;
       }
     })
     .then(urls => {
@@ -99,5 +104,12 @@ function handlePOST (req, res) {
     })
     .then(result => {
       res.json(result);
+    })
+    .catch(err => {
+      if (err === NoValidUrls) {
+        res.status(415).send();
+      } else {
+        res.status(500).send();
+      }
     });
 }

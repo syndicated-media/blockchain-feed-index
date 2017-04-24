@@ -20,13 +20,19 @@ class PostchainClient {
         return this.send(req, url, result => result && result.length === 1);
     }
 
+    get (count, fromId) {
+      console.log("Count and from", count, fromId);
+        return this.query({type: 'get', count: count, fromId: fromId},
+            result => result.map(podcast => podcastObject(podcast)));
+    }
+
     getByPublicKey(publicKey) {
-        return this.query({type: "getPodcastsByOwner", url: publicKey.toString('hex')},
+        return this.query({type: 'getPodcastsByOwner', owner: publicKey.toString('hex')},
             result => result.map(podcast => podcastObject(podcast)));
     }
 
     getByUrl(url) {
-        return this.query({type: "getPodcastByUrl", url: url}, result => singleResult(result))
+        return this.query({type: 'getPodcastByUrl', url: url}, result => singleResult(result))
     }
 
     query(queryObject, resultHandler) {
@@ -100,7 +106,7 @@ class PostchainClient {
                     console.log(error);
                     reject(error);
                 }
-                let queryObject = {type: "getPodcastByUrl", url: urlToFollFor};
+                let queryObject = {type: 'getPodcastByUrl', url: urlToFollFor};
                 this.queryUntilCondition(queryObject, pollCondition)
                     .then(queryResult => {
                         resolve(singleResult(queryResult))
@@ -123,15 +129,15 @@ class PostchainClient {
                 }
                 if (!condition(result)) {
                     if (Date.now() > timeout) {
-                        reject(new Error("timeout"));
+                        reject(new Error('timeout'));
                         return;
                     }
                     // Poll every 2 seconds
-                    console.log("Condition not met yet, retrying in 2 seconds");
+                    console.log('Condition not met yet, retrying in 2 seconds');
                     setTimeout(() => this.gtx.query(queryObject, resultHandler), 2000);
                     return;
                 }
-                console.log(JSON.stringify(result));
+                //console.log(JSON.stringify(result));
                 resolve(result);
             }
             this.gtx.query(queryObject, resultHandler);
@@ -198,10 +204,10 @@ function someExternalActorSignsThisBufferInHerWebBrowserAndReturnsTheSignature(b
 
 function singleResult(queryResult) {
     if (!queryResult) {
-        throw new Error("queryResult was null");
+        throw new Error('queryResult was null');
     }
     if (queryResult.length > 1) {
-        throw new Error("Too many results, expected at most 1");
+        throw new Error('Too many results, expected at most 1');
     }
     if (queryResult.length === 0) {
         return null;

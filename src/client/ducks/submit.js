@@ -8,8 +8,6 @@ const ERROR = 'podchain/submit/ERROR';
 const initalState = {
     urls: [],
     response: '',
-    isGettingUrls: false,
-    isValidatingUrls: false,
     isPostingUrls: false,
     isComplete: false,
     isError: false
@@ -23,29 +21,9 @@ export default function reducer (state = initalState, action = {}) {
         urls: action.urls
       };
 
-    case GET_FROM_PODCHAIN:
-      return {
-        ...state,
-        isGettingUrls: true,
-        isValidatingUrls: false,
-        isPostingUrls: false,
-        isComplete: false
-      };
-
-    case VALIDATE:
-      return {
-        ...state,
-        isGettingUrls: false,
-        isValidatingUrls: true,
-        isPostingUrls: false,
-        isComplete: false
-      };
-
     case POST_TO_PODCHAIN:
       return {
         ...state,
-        isGettingUrls: false,
-        isValidatingUrls: false,
         isPostingUrls: true,
         isComplete: false
       };
@@ -53,8 +31,6 @@ export default function reducer (state = initalState, action = {}) {
     case COMPLETE:
       return {
         ...state,
-        isGettingUrls: false,
-        isValidatingUrls: false,
         isPostingUrls: false,
         isComplete: true,
         isError: false,
@@ -64,8 +40,6 @@ export default function reducer (state = initalState, action = {}) {
     case ERROR:
       return {
         ...state,
-        isGettingUrls: false,
-        isValidatingUrls: false,
         isPostingUrls: false,
         isComplete: true,
         isError: true,
@@ -84,45 +58,23 @@ export function submit (urls) {
     urls = cleanUrls (urls);
 
     dispatch (init (urls));
-    dispatch (getFromPodchain ());
-
-    fetch ('/api/podcasts?q=' + urls.join (','))
+    dispatch (postToBlockchain);
+    fetch ('/api/podcasts', {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      method: 'POST',
+      body: JSON.stringify({
+        method: 'create',
+        urls: urls
+      })
+    })
       .then (response => response.json())
       .then (response => {
-        //urls = removeAlreadyInPodchain (urls, response);
-
-        if (urls.length) {
-          dispatch (validate ());
-          fetch ('/api/validate?q=' + urls.join(','))
-            .then (response => response.json())
-            .then (response => {
-              urls = removeInvalidAndAddMetaData (response.urls);
-
-              if (urls.length) {
-                dispatch (postToBlockchain);
-                fetch ('/api/podcasts', {
-                  headers: {
-                    'Content-Type': 'application/json'
-                  },
-                  method: 'POST',
-                  body: JSON.stringify({
-                    urls
-                  })
-                })
-                  .then (response => response.json())
-                  .then (response => {
-                    dispatch (complete ('Podcast(s) succesfully submitted'));
-                  })
-              } else {
-                dispatch (complete ('No valid podcast(s) to submit'));
-              }
-            });
-        } else {
-          dispatch (complete ('Podcast(s) already in Podchain'));
-        }
+        dispatch (complete ('Podcast(s) succesfully submitted'));
       })
       .catch(response => {
-        dispatch (error (JSON.stringify(response)));
+        dispatch (error ('Something went wrong when submitting podcast(s)'));
       });
   }
 }
@@ -133,18 +85,6 @@ function init (urls) {
   return {
     type: INIT,
     urls: urls
-  };
-}
-
-function getFromPodchain () {
-  return {
-    type: GET_FROM_PODCHAIN
-  };
-}
-
-function validate () {
-  return {
-    type: VALIDATE
   };
 }
 
@@ -214,7 +154,8 @@ function cleanUrls (urls) {
       url = url.slice(0, url.length - 1);
     }
 
-    return url;
+    // add http protocol
+    return "http://" + url;
   });
 }
 

@@ -10,6 +10,7 @@ const create = (urls, newOwnerPublicKey) => {
   return Promise.all (promises);
 }
 
+const get = (count, fromId) => postchain.get(count, fromId);
 const getByPublicKey = publicKey => postchain.getByPublicKey(publicKey);
 const getByUrls = urls => {
   let promises = [];
@@ -26,6 +27,7 @@ const transfer = (url, newOwnerPublicKey) => postchain.transfer(url, keys.privat
 
 module.exports = {
   create,
+  get,
   getByUrls,
   getByPublicKey,
   update,
