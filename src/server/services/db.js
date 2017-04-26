@@ -14,7 +14,7 @@ client.connect(err => {
   if (err) {
     throw err;
   }
-  
+
   let query = client.query('CREATE TABLE items(id UUID PRIMARY KEY, publickey TEXT, privatekey TEXT)');
   query.on('end', () => client.end());
   query.on('error', (err) => {

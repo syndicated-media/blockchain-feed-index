@@ -42,6 +42,10 @@ function handleGET (req, res) {
         log.error(err);
         res.status(404).send()
       });
+  } else if (query.id) {
+      podcasts.getById(query.id)
+        .then(result => res.json(result))
+        .catch(err => res.status(404).send());
   } else {
     podcasts.get(query.count, query.from)
       .then(result => res.json(result))

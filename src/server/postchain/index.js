@@ -1,5 +1,6 @@
 const secp256k1 = require('secp256k1');
 const crypto = require('crypto');
+const uuid = require('uuid4');
 
 const restClient = require('postchain-client').restClient;
 const gtxClient = require('postchain-client').gtxClient;
@@ -15,7 +16,7 @@ class PostchainClient {
         const consortiumPublicKey = secp256k1.publicKeyCreate(consortiumPrivateKey);
 
         let req = this.gtx.newRequest([consortiumPublicKey]);
-        req.newUrl(url, title, email, podcasterPublicKey, consortiumPublicKey);
+        req.newUrl(uuid(), url, title, email, podcasterPublicKey, consortiumPublicKey);
         req.sign(consortiumPrivateKey);
         return this.send(req, url, result => result && result.length === 1);
     }
@@ -23,9 +24,6 @@ class PostchainClient {
     get (count, fromId) {
         if (count !== undefined) {
           count = parseInt(count);
-        }
-        if (fromId !== undefined) {
-          fromId = parseInt(fromId);
         }
 
         return this.query({type: 'get', count: count, fromId: fromId},
@@ -39,6 +37,10 @@ class PostchainClient {
 
     getByUrl(url) {
         return this.query({type: 'getPodcastByUrl', url: url}, result => singleResult(result))
+    }
+
+    getById(id) {
+        return this.query({type: 'getPodcastById', id: id}, result => singleResult(result))
     }
 
     query(queryObject, resultHandler) {
