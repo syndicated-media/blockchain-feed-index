@@ -30,23 +30,27 @@ const get = (req, res) => {
 // create new entry
 const create = (req, res) => {
   let body = req.body;
-  let urls = body.url || body.urls;
-  let publicKey = body.key;
-
-  if (!Array.isArray(urls)) {
-    urls = [urls]
-  }
-  urls = cleanUrls(urls);
+  let urls = cleanUrls(body.url || body.urls);
 
   validate(urls)
     .then(removeInvalid)
-    .then(urls => podchain.create(urls, publicKey))
+    .then(urls => podchain.create(urls))
     .then(handleResult(res))
     .catch(handleError(res));
 }
 
 const update = (req, res) => {
+  let body = req.body;
+  let url = cleanUrl(body.url);
+  let currentUrl = cleanUrl(body.currentUrl || body.currenturl);
+  let privateKey = req.privateKey;
 
+  validate(url)
+    .then(removeInvalid)
+    .then(validUrls => {
+      let pod = validUrls[0];
+      return podchain.update(currentUrl, pod.url, pod.title, pod.email, privateKey);
+    }
 }
 
 const transfer = (req, res) => {
@@ -132,29 +136,39 @@ function handlePOST (req, res) {
 
 // helpers
 
+const asArray = urls => {
+  if (!Array.isArray(urls)) {
+    return [urls];
+  }
+  return urls;
+}
+
+const cleanUrl = url => {
+  // remove protocol
+  let i = url.indexOf('://');
+  if (i > -1 && i < 6) {
+    url = url.slice(i + 3);
+  }
+
+  // remove query
+  i = url.indexOf('?');
+  if (i > -1) {
+    url = url.slice(0, i);
+  }
+
+  // remove trailing slash
+  i = url.lastIndexOf('/');
+  if (i === url.length - 1) {
+    url = url.slice(0, url.length - 1);
+  }
+
+  // add http protocol
+  return "http://" + url;
+}
+
 const cleanUrls = urls => {
-  return urls.map (url => {
-    // remove protocol
-    let i = url.indexOf('://');
-    if (i > -1 && i < 6) {
-      url = url.slice(i + 3);
-    }
-
-    // remove query
-    i = url.indexOf('?');
-    if (i > -1) {
-      url = url.slice(0, i);
-    }
-
-    // remove trailing slash
-    i = url.lastIndexOf('/');
-    if (i === url.length - 1) {
-      url = url.slice(0, url.length - 1);
-    }
-
-    // add http protocol
-    return "http://" + url;
-  });
+  urls = asArray(urls);
+  return urls.map (url => cleanUrl(url));
 }
 
 const removeInvalid = result => {

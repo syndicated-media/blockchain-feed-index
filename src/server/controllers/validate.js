@@ -3,6 +3,9 @@ const FeedParser = require ('feedparser');
 const log = require('../services/log');
 
 module.exports = urls => {
+  if (!Array.isArray(urls)) {
+    urls = [urls];
+  }
   var response = {
     urls: []
   };

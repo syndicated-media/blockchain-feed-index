@@ -1,10 +1,10 @@
 const postchain = require ('../postchain');
 const keys = require ('../postchain/keys');
 
-const create = (urls, newOwnerPublicKey) => {
+const create = (urls, privateKey, publicKey) => {
   let promises = [];
   urls.forEach (data => {
-    promises.push (postchain.create(data.url, data.title, data.email, keys.private, newOwnerPublicKey || keys.public));
+    promises.push (postchain.create(data.url, data.title, data.email, privateKey || keys.private, publicKey || keys.public));
   });
 
   return Promise.all (promises);
