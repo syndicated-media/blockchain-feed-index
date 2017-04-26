@@ -7,7 +7,7 @@ const mapStateToProps = (state) => {
   let submit = state.submit;
   return {
     urls: submit.urls,
-    isSubmitting: submit.isGettingUrls || submit.isValidatingUrls || submit.isPostingUrls,
+    isPostingUrls: submit.isPostingUrls,
     isComplete: submit.isComplete,
     isError: submit.isError,
     response: submit.response

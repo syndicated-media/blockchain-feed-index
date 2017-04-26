@@ -1,5 +1,6 @@
 const request = require ('request');
 const FeedParser = require ('feedparser');
+const log = require('../services/log');
 
 module.exports = urls => {
   var response = {
@@ -31,13 +32,20 @@ const validate = (urls, response, resolve, reject) => {
 
 const validateOne = url => {
   return new Promise ((resolve, reject) => {
+    log(' validating: ' + url);
     let feedparser = new FeedParser();
     let result = {};
+    let req;
+    try {
+      req = request(url, {
+        timeout: 10000,
+        pool: false
+      });
+    } catch (e) {
+      doReject(reject, url)(e);
+      return;
+    }
 
-    let req = request(url, {
-      timeout: 10000,
-      pool: false
-    });
     req.setHeader('user-agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36');
     req.setHeader('accept', 'text/html,application/xhtml+xml');
     req.on('error', doReject(reject, url));

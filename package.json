@@ -17,6 +17,7 @@
     "feedparser": "2.1.0",
     "isomorphic-fetch": "2.2.1",
     "pg": "6.1.5",
+    "postchain-client": "^0.1.0",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",
     "react-redux": "^5.0.3",
@@ -24,6 +25,7 @@
     "redux": "^3.6.0",
     "redux-thunk": "2.2.0",
     "request": "2.81.0",
+    "secp256k1": "^3.2.5",
     "uuid4": "1.0.0"
   },
   "devDependencies": {
