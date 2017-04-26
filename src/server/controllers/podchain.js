@@ -13,14 +13,7 @@ const create = (urls, newOwnerPublicKey) => {
 const get = (count, fromId) => postchain.get(count, fromId);
 const getByPublicKey = publicKey => postchain.getByPublicKey(publicKey);
 const getById = id => postchain.getById(id);
-const getByUrls = urls => {
-  let promises = [];
-  urls.forEach (url => {
-    promises.push (postchain.getByUrl (url));
-  });
-
-  return Promise.all (promises);
-}
+const getByUrl = url => postchain.getByUrl(url);
 
 const update = (currentUrl, url, title, email, privateKey) => postchain.update(currentUrl, url, title, email, keys.private, privateKey || keys.private);
 const del = (url, privateKey) => postchain.delete(url, privateKey || keys.private);
@@ -30,7 +23,7 @@ module.exports = {
   create,
   get,
   getById,
-  getByUrls,
+  getByUrl,
   getByPublicKey,
   update,
   transfer,

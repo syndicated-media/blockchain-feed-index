@@ -22,8 +22,8 @@ const validate = (urls, response, resolve, reject) => {
       })
       .catch (result => {
         response.urls.push (result);
-        resolve (response);
-//        validate (urls, response, resolve);
+//        resolve (response);
+        validate (urls, response, resolve);
       });
   } else {
     resolve(response);
@@ -75,7 +75,8 @@ const validateOne = url => {
       } else {
         resolve({
           valid: false,
-          url: url
+          url: url,
+          error: 'No metadata about title and/or email'
         });
       }
     });
