@@ -39,6 +39,7 @@ const create = (req, res) => {
     .catch(handleError(res));
 }
 
+// update an entry
 const update = (req, res) => {
   let body = req.body;
   let url = cleanUrl(body.url);
@@ -47,18 +48,46 @@ const update = (req, res) => {
 
   validate(url)
     .then(removeInvalid)
-    .then(validUrls => {
-      let pod = validUrls[0];
+    .then(validPods => {
+      let pod = validPods[0];
       return podchain.update(currentUrl, pod.url, pod.title, pod.email, privateKey);
-    }
+    })
+    .then(handleResult(res))
+    .catch(handleError(res));
 }
 
+// transfer ownership of entry
+// todo: allow for wallet middleware so other than
+// initial concortium member can make transfers
 const transfer = (req, res) => {
+  let body = req.body;
+  let url = cleanUrl(body.url);
+  let newOwnerPublicKey = body.publicKey;
 
+  validate(url)
+    .then(removeInvalid)
+    .then(validPods => {
+      let pod = validPods[0];
+      return podchain.transfer(pod.url, newOwnerPublicKey);
+    })
+    .then(handleResult(res))
+    .catch(handleError(res));
 }
 
+// delete entry
 const del = (req, res) => {
+  let body = req.body;
+  let url = cleanUrl(body.url);
+  let privateKey = req.privateKey;
 
+  validate(url)
+    .then(removeInvalid)
+    .then(validPods => {
+      let pod = validPods[0];
+      return podchain.del(pod.url, privateKey);
+    })
+    .then(handleResult(res))
+    .catch(handleError(res));
 }
 
 module.exports = {
@@ -68,71 +97,6 @@ module.exports = {
   transfer,
   del
 };
-
-/*
-
-function handlePOST (req, res) {
-  let body = req.body;
-  let urls = body.urls || body.url || body.newUrl || body.url;
-  let currentUrl = body.currentUrl || body.currenturl;
-  let method = body.method;
-  let privateKey = body.privateKey || body.privatekey || body.key;
-  let newOwnerPublicKey = body.newOwnerPublicKey;
-  if (typeof method === 'undefined' || typeof urls === 'undefined') {
-    res.status(400).send();
-    return;
-  }
-
-  if (!Array.isArray(urls)) {
-    urls = [urls]
-  }
-
-  validate(urls)
-    .then(result => {
-      let validUrls = [];
-      result.urls.forEach(item => {
-        if (item.valid) {
-          log(' valid: ' + item.url);
-          validUrls.push(item);
-        } else {
-          log.error(' invalid: ' + item.url);
-        }
-      });
-
-      if (validUrls.length) {
-        return validUrls;
-      } else {
-        throw NoValidUrls;
-      }
-    })
-    .then(urls => {
-      log (' method: ' + method);
-      switch (method.toLowerCase()) {
-        case 'create':
-          return podchain.create(urls, privateKey);
-
-        case 'update':
-          return podchain.update(currentUrl, urls[0].url, urls[0].title, urls[0].email, privateKey);
-
-        case 'transfer':
-          return podchain.transfer(urls[0].url, newOwnerPublicKey);
-
-        case 'delete':
-          return podchain.del(urls[0].url, privateKey);
-      }
-    })
-    .then(result => {
-      res.json(result);
-    })
-    .catch(err => {
-      if (err === NoValidUrls) {
-        res.status(415).send();
-      } else {
-        res.status(500).send();
-      }
-    });
-}
-*/
 
 // helpers
 
