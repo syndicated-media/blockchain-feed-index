@@ -3,8 +3,12 @@ import AuthService from '../services/auth0';
 const LOGIN = 'podchain/profile/LOGIN';
 const LOGOUT = 'podchain/profile/LOGIN';
 const AUTHENTICATE = 'podchain/profile/AUTHENTICATE';
-const FETCHING_INFO = 'podchain/profile/FETCHING_INFO';
-const SET_INFO = 'podchain/profile/SET_INFO'
+const FETCHING_USER_INFO = 'podchain/profile/FETCHING_USER_INFO';
+const SET_USER_INFO = 'podchain/profile/SET_USER_INFO';
+const FETCHING_KEYS = 'podchain/profile/FETCHING_KEYS';
+const SET_KEYS = 'podchain/profile/SET_KEYS';
+const FETCHING_FEEDS = 'podchain/profile/FETCHING_FEEDS';
+const SET_FEEDS = 'podchain/profile/SET_FEEDS';
 const LOCALSTORAGEKEY = 'podchain-poc-state';
 
 const authService = new AuthService('K3Cuu3SC9mlt9M3OujeVtJFRAs9MBNL5', 'podchaintest.auth0.com');
@@ -48,19 +52,18 @@ export default function reducer (state = initalState, action = {}) {
         auth: {}
       };
 
-    case FETCHING_INFO:
+    case FETCHING_USER_INFO:
       return {
         ...state,
         isFetchingInfo: true
       };
 
-    case SET_INFO:
+    case SET_USER_INFO:
       return {
         ...state,
         isFetchingInfo: false,
         id: action.userId,
-        email: action.email,
-        feeds: action.feeds
+        email: action.email
       };
 
     default:
@@ -88,19 +91,30 @@ export function authenticate (auth) {
       type: AUTHENTICATE,
       auth: auth
     });
-    dispatch(fetchingInfo());
 
-    let user, feeds;
+    dispatch(fetchingUserInfo());                         // this step with user info is probably not needed
     fetch('https://podchaintest.auth0.com/userinfo', {
       headers: {
         'Authorization': 'Bearer ' + localStorage.getItem('access_token')
       }
     })
       .then(response => response.json())
-      .then(response => {
-        user = response;
-        debugger;
-        dispatch(setInfo(user, []));
+      .then(user => {
+        dispatch(setUserInfo(user));
+
+        dispatch(fetchingFeeds());
+        fetch('/api/wallet/profile/', {
+          headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('id_token')
+          }
+        })
+          .then(response => response.json())
+          .then(feeds => {
+            dispatch(setFeeds(feeds));
+          })
+          .catch(error => {
+            console.log(error);
+          });
       })
       .catch(error => {
         console.log(error);
@@ -108,19 +122,44 @@ export function authenticate (auth) {
   }
 }
 
-function fetchingInfo () {
+function fetchingUserInfo () {
   return {
-    type: FETCHING_INFO
+    type: FETCHING_USER_INFO
   };
 }
 
-function setInfo (user, feeds) {
+function setUserInfo (user) {
   return {
-    type: SET_INFO,
+    type: SET_USER_INFO,
     id: user.user_id.split('uth0|')[1],
     email: user.email,
-    feeds: feeds
   };
+}
+
+function fetchingKeys () {
+  return {
+    type: FETCHING_KEYS
+  };
+}
+
+function setKeys (publicKey) {
+  return {
+    type: SET_KEYS,
+    publicKey: publicKey
+  };
+}
+
+function fetchingFeeds () {
+  return {
+    type: FETCHING_FEEDS
+  };
+}
+
+function setFeeds (feeds) {
+  return {
+    type: SET_FEEDS,
+    feeds: feeds
+  }
 }
 
 export function logout () {

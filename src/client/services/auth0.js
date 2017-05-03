@@ -16,7 +16,6 @@ export default class AuthService {
   }
 
   _doAuthentication (auth) {
-    debugger;
     this.setToken(auth.idToken, auth.accessToken);
 
     let store = require('../store').default;
