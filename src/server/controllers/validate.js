@@ -3,6 +3,9 @@ const FeedParser = require ('feedparser');
 const log = require('../services/log');
 
 module.exports = urls => {
+  if (!Array.isArray(urls)) {
+    urls = [urls];
+  }
   var response = {
     urls: []
   };
@@ -22,8 +25,8 @@ const validate = (urls, response, resolve, reject) => {
       })
       .catch (result => {
         response.urls.push (result);
-        resolve (response);
-//        validate (urls, response, resolve);
+//        resolve (response);
+        validate (urls, response, resolve);
       });
   } else {
     resolve(response);
@@ -75,7 +78,8 @@ const validateOne = url => {
       } else {
         resolve({
           valid: false,
-          url: url
+          url: url,
+          error: 'No metadata about title and/or email'
         });
       }
     });

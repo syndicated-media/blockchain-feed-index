@@ -28,16 +28,20 @@ if (app.get('env') == 'development') {
 }
 
 app.get('*', client);
-//app.get('/login', client);
-//app.use(auth0.initialize);
-//app.use(auth0.session);
-//app.get('/callback', auth0.authenticate, auth0.login);
-//app.get('/profile', auth0.ensureLoggedIn, client);
-//app.get('/logout', auth0.ensureLoggedIn, auth0.logout);
 
 // start
 app.listen(8000, () => {
   console.log('Server running on 8000');
+
+  let crypto = require('crypto');
+  let secp256k1 = require('secp256k1');
+  var privKey;
+  do {
+      privKey = crypto.randomBytes(32);
+  } while (!secp256k1.privateKeyVerify(privKey));
+  var pubKey = secp256k1.publicKeyCreate(privKey);
+
+  console.log('Public key for test purposes:', pubKey.toString('hex'));
 });
 
 // helpers
