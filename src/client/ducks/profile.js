@@ -99,8 +99,7 @@ export function authenticate (auth) {
       .then(response => response.json())
       .then(response => {
         user = response;
-
-        
+        debugger;
         dispatch(setInfo(user, []));
       })
       .catch(error => {

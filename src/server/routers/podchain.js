@@ -13,13 +13,15 @@ const get = (req, res) => {
   let promise;
 
   if (query.key) {
-    request = podchain.getByPublicKey(query.key)
+    request = podchain.getByPublicKey(query.key);
   } else if (query.url) {
-    request = podchain.getByUrl(query.url)
+    request = podchain.getByUrl(query.url);
   } else if (query.id) {
-    request = podchain.getById(query.id)
+    request = podchain.getById(query.id);
+  } else if (query.email) {
+    request = podchain.getByEmail(query.email);
   } else {
-    request = podchain.get(query.count, query.from)
+    request = podchain.get(query.count, query.from);
   }
 
   request
