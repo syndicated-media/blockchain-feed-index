@@ -3,8 +3,8 @@ import AuthService from '../services/auth0';
 const LOGIN = 'podchain/profile/LOGIN';
 const LOGOUT = 'podchain/profile/LOGIN';
 const AUTHENTICATE = 'podchain/profile/AUTHENTICATE';
-const FETCHING_INFO = 'podchain/profile/FETCHING_INFO';
-const SET_INFO = 'podchain/profile/SET_INFO'
+const FETCHING_PROFILE = 'podchain/profile/FETCHING_PROFILE';
+const SET_PROFILE = 'podchain/profile/SET_PROFILE';
 const LOCALSTORAGEKEY = 'podchain-poc-state';
 
 const authService = new AuthService('K3Cuu3SC9mlt9M3OujeVtJFRAs9MBNL5', 'podchaintest.auth0.com');
@@ -12,10 +12,11 @@ const initalState = {
     loggingIn: false,
     logginOut: false,
     authenticated: false,
-    isFetchingInfo: false,
-    feeds: [],
-    email: '',
+    isFetchingProfile: false,
     id: '',
+    email: '',
+    publicKey: '',
+    feeds: [],
     auth: {}
 };
 
@@ -39,28 +40,33 @@ export default function reducer (state = initalState, action = {}) {
         auth: action.auth
       };
 
+    case FETCHING_PROFILE:
+      return {
+        ...state,
+        isFetchingProfile: true
+      };
+
+    case SET_PROFILE:
+      return {
+        ...state,
+        isFetchingProfile: false,
+        id: action.id,
+        email: action.email,
+        publicKey: action.publicKey,
+        feeds: action.feeds
+      };
+
     case LOGOUT:
       return {
         ...state,
         loggingIn: false,
         logginOut: true,
         authenticated: false,
+        id: '',
+        email: '',
+        publicKey: '',
+        feeds: [],
         auth: {}
-      };
-
-    case FETCHING_INFO:
-      return {
-        ...state,
-        isFetchingInfo: true
-      };
-
-    case SET_INFO:
-      return {
-        ...state,
-        isFetchingInfo: false,
-        id: action.userId,
-        email: action.email,
-        feeds: action.feeds
       };
 
     default:
@@ -88,20 +94,16 @@ export function authenticate (auth) {
       type: AUTHENTICATE,
       auth: auth
     });
-    dispatch(fetchingInfo());
 
-    let user, feeds;
-    fetch('https://podchaintest.auth0.com/userinfo', {
+    dispatch(fetchingProfile());
+    fetch('/api/wallet/profile', {
       headers: {
-        'Authorization': 'Bearer ' + localStorage.getItem('access_token')
+        'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
       }
     })
       .then(response => response.json())
-      .then(response => {
-        user = response;
-
-        
-        dispatch(setInfo(user, []));
+      .then(profile => {
+        dispatch(setProfile(profile));
       })
       .catch(error => {
         console.log(error);
@@ -109,32 +111,23 @@ export function authenticate (auth) {
   }
 }
 
-function fetchingInfo () {
+function fetchingProfile () {
   return {
-    type: FETCHING_INFO
+    type: FETCHING_PROFILE
   };
 }
 
-function setInfo (user, feeds) {
+function setProfile (profile) {
   return {
-    type: SET_INFO,
-    id: user.user_id.split('uth0|')[1],
-    email: user.email,
-    feeds: feeds
-  };
+    type: SET_PROFILE,
+    ...profile
+  }
 }
 
 export function logout () {
   authService.logout();
   return {
     type: LOGOUT
-  };
-}
-
-export function setFeeds (feeds) {
-  return {
-    type: SET_FEEDS,
-    feeds: feeds
   };
 }
 

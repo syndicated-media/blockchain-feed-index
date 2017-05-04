@@ -59,13 +59,12 @@ export function submit (urls) {
 
     dispatch (init (urls));
     dispatch (postToBlockchain);
-    fetch ('/api/podcasts', {
+    fetch ('/api/podchain/create', {
       headers: {
         'Content-Type': 'application/json'
       },
       method: 'POST',
       body: JSON.stringify({
-        method: 'create',
         urls: urls
       })
     })

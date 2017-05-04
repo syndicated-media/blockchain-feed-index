@@ -43,6 +43,11 @@ class PostchainClient {
         return this.query({type: 'getPodcastById', id: id}, result => singleResult(result))
     }
 
+    getByEmail(email) {
+        return this.query({type: 'getPodcastsByEmail', email: email}, 
+            result => result.map(podcast => podcastObject(podcast)));
+    }
+
     query(queryObject, resultHandler) {
         return new Promise((resolve, reject) => {
             this.gtx.query(queryObject,
