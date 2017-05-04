@@ -3,12 +3,8 @@ import AuthService from '../services/auth0';
 const LOGIN = 'podchain/profile/LOGIN';
 const LOGOUT = 'podchain/profile/LOGIN';
 const AUTHENTICATE = 'podchain/profile/AUTHENTICATE';
-const FETCHING_USER_INFO = 'podchain/profile/FETCHING_USER_INFO';
-const SET_USER_INFO = 'podchain/profile/SET_USER_INFO';
-const FETCHING_KEYS = 'podchain/profile/FETCHING_KEYS';
-const SET_KEYS = 'podchain/profile/SET_KEYS';
-const FETCHING_FEEDS = 'podchain/profile/FETCHING_FEEDS';
-const SET_FEEDS = 'podchain/profile/SET_FEEDS';
+const FETCHING_PROFILE = 'podchain/profile/FETCHING_PROFILE';
+const SET_PROFILE = 'podchain/profile/SET_PROFILE';
 const LOCALSTORAGEKEY = 'podchain-poc-state';
 
 const authService = new AuthService('K3Cuu3SC9mlt9M3OujeVtJFRAs9MBNL5', 'podchaintest.auth0.com');
@@ -16,10 +12,11 @@ const initalState = {
     loggingIn: false,
     logginOut: false,
     authenticated: false,
-    isFetchingInfo: false,
-    feeds: [],
-    email: '',
+    isFetchingProfile: false,
     id: '',
+    email: '',
+    publicKey: '',
+    feeds: [],
     auth: {}
 };
 
@@ -43,27 +40,33 @@ export default function reducer (state = initalState, action = {}) {
         auth: action.auth
       };
 
+    case FETCHING_PROFILE:
+      return {
+        ...state,
+        isFetchingProfile: true
+      };
+
+    case SET_PROFILE:
+      return {
+        ...state,
+        isFetchingProfile: false,
+        id: action.id,
+        email: action.email,
+        publicKey: action.publicKey,
+        feeds: action.feeds
+      };
+
     case LOGOUT:
       return {
         ...state,
         loggingIn: false,
         logginOut: true,
         authenticated: false,
+        id: '',
+        email: '',
+        publicKey: '',
+        feeds: [],
         auth: {}
-      };
-
-    case FETCHING_USER_INFO:
-      return {
-        ...state,
-        isFetchingInfo: true
-      };
-
-    case SET_USER_INFO:
-      return {
-        ...state,
-        isFetchingInfo: false,
-        id: action.userId,
-        email: action.email
       };
 
     default:
@@ -92,29 +95,15 @@ export function authenticate (auth) {
       auth: auth
     });
 
-    dispatch(fetchingUserInfo());                         // this step with user info is probably not needed
-    fetch('https://podchaintest.auth0.com/userinfo', {
+    dispatch(fetchingProfile());
+    fetch('/api/wallet/profile', {
       headers: {
-        'Authorization': 'Bearer ' + localStorage.getItem('access_token')
+        'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
       }
     })
       .then(response => response.json())
-      .then(user => {
-        dispatch(setUserInfo(user));
-
-        dispatch(fetchingFeeds());
-        fetch('/api/wallet/profile/', {
-          headers: {
-            'Authorization': 'Bearer ' + localStorage.getItem('id_token')
-          }
-        })
-          .then(response => response.json())
-          .then(feeds => {
-            dispatch(setFeeds(feeds));
-          })
-          .catch(error => {
-            console.log(error);
-          });
+      .then(profile => {
+        dispatch(setProfile(profile));
       })
       .catch(error => {
         console.log(error);
@@ -122,43 +111,16 @@ export function authenticate (auth) {
   }
 }
 
-function fetchingUserInfo () {
+function fetchingProfile () {
   return {
-    type: FETCHING_USER_INFO
+    type: FETCHING_PROFILE
   };
 }
 
-function setUserInfo (user) {
+function setProfile (profile) {
   return {
-    type: SET_USER_INFO,
-    id: user.user_id.split('uth0|')[1],
-    email: user.email,
-  };
-}
-
-function fetchingKeys () {
-  return {
-    type: FETCHING_KEYS
-  };
-}
-
-function setKeys (publicKey) {
-  return {
-    type: SET_KEYS,
-    publicKey: publicKey
-  };
-}
-
-function fetchingFeeds () {
-  return {
-    type: FETCHING_FEEDS
-  };
-}
-
-function setFeeds (feeds) {
-  return {
-    type: SET_FEEDS,
-    feeds: feeds
+    type: SET_PROFILE,
+    ...profile
   }
 }
 
@@ -166,13 +128,6 @@ export function logout () {
   authService.logout();
   return {
     type: LOGOUT
-  };
-}
-
-export function setFeeds (feeds) {
-  return {
-    type: SET_FEEDS,
-    feeds: feeds
   };
 }
 

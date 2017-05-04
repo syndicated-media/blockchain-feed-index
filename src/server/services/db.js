@@ -9,63 +9,77 @@ if (!process.env.PGUSER) {
   throw new Error('Missing environment variables for Postgres. Please add environment variables for PGUSER, PGPASSWORD, PGPORT, PGHOST, PGDATABASE');
 }
 
-const client = new pg.Client();
-const connect = () => {
+// setup a pool
+const pool = new pg.Pool({
+  max: 10,
+  idleTimeoutMillis: 30000
+});
+pool.on('error', (err, client) => {
+  console.log(err);
+});
+
+const getClient = () => {
   return new Promise ((resolve, reject) => {
-    client.connect(err => {
+    pool.connect((err, client, done) => {
       if (err) {
         reject(err);
       } else {
-        resolve();
+        resolve(client, done);
       }
     })
   });
 }
-const query = q => {
-  return new Promise ()
-  let query = client.quer
-}
-
-connect()
-  .then(() => {
-    let query = client.query('CREATE TABLE items(id TEXT PRIMARY KEY, publickey TEXT, privatekey TEXT)');
-    query.on('end', () => client.end());
-    query.on('error', (err) => {
-      client.end();
-    });
-  })
-  .catch(err => {
-    console.log(err);
-  });
-
-const get = (id) => {
-  return new Promise((resolve, reject) => {
-    connect()
-      .then(() => {
-        query()
-        let query = client.query('SELECT $1::TEXT as id', [id], (err, result) => {
-
-      })
-      .catch(reject);
-
-    client.connect(err => {
+const query = (query, values) => {
+  return new Promise ((resolve, reject) => {
+    pool.query(query, values, (err, result) => {
       if (err) {
         reject(err);
-        return;
+      } else {
+        resolve(result);
       }
-
-        if (err) {
-          reject(err);
-          return;
-        }
-
-        if ()
-      }
-      resolve('CONNETED');
     });
+  });
+}
+
+// create table
+//query('DROP TABLE wallet')
+//.then(()=>{
+query('CREATE TABLE IF NOT EXISTS wallet(id TEXT PRIMARY KEY, email TEXT NOT NULL, publicKey TEXT NOT NULL, privateKey TEXT NOT NULL)')
+  .then(() => {
+    console.log('PG table created');
+  })
+  .catch(err => {
+    console.log('PG table error', err);
+  });
+//});
+// get by id
+const select = (id) => {
+  return new Promise((resolve, reject) => {
+    query('SELECT * from wallet WHERE id = $1', [id])
+      .then(result => {
+        console.log('PG SELECT', result.rows.length);
+        resolve(result.rows);
+      })
+      .catch(err => {
+        reject(err);
+      });
+    });
+}
+
+// insert
+const insert = (id, email, publicKey, privateKey) => {
+  return new Promise((resolve, reject) => {
+    console.log('PG INSERT', id);
+    query('INSERT INTO wallet (id, email, publicKey, privateKey) VALUES ($1, $2, $3, $4)', [id, email, publicKey, privateKey])
+      .then(resolve)
+      .catch(err => {
+        console.log('PG insert error', err);
+        reject(err);
+      });
   });
 }
 
 module.exports = {
-  get
+  select,
+  insert
 };
