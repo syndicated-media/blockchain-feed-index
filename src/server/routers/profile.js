@@ -8,6 +8,7 @@ module.exports = (req, res) => {
         res.json(user.toResponse());
       })
       .catch(err => {
+        console.log(err);
         res.status(500).send(err);
       });
 }

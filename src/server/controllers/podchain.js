@@ -18,7 +18,7 @@ const getByEmail = email => postchain.getByEmail(email);
 
 const update = (currentUrl, url, title, email, privateKey) => postchain.update(currentUrl, url, title, email, keys.private, privateKey || keys.private);
 const del = (url, privateKey) => postchain.delete(url, privateKey || keys.private);
-const transfer = (url, newOwnerPublicKey) => postchain.transfer(url, keys.private, newOwnerPublicKey);
+const transfer = (url, privateKey, newOwnerPublicKey) => postchain.transfer(url, privateKey || keys.private, newOwnerPublicKey);
 
 module.exports = {
   create,
