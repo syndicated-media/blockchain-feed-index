@@ -4,7 +4,6 @@ const secp256k1 = require('secp256k1');
 
 module.exports = (req, res, next) => {
   // get public and private key from user id (auth header)
-
   let user = req.user;
   if (user) {
     db.select(user.id)
@@ -13,16 +12,18 @@ module.exports = (req, res, next) => {
             create(user)
               .then(next)
               .catch(err => {
-                console.log(err);
-                  res.status(500).send(err);
+                res.status(500).send(err);
               });
         } else {
-          user.setKeys(keys)
-            .then(next);
+          user.setKeysFromDB(keys)
+            .then(next)
+            .catch(err => {
+              console.log(err);
+              res.status(500).send(err);
+            });
         }
       })
       .catch(err => {
-        console.log(err);
         res.status(401).send();
       });
   } else {
@@ -30,6 +31,7 @@ module.exports = (req, res, next) => {
   }
 }
 
+// create user
 const create = user => {
   return new Promise((resolve, reject) => {
     let privateKey;
@@ -43,13 +45,11 @@ const create = user => {
 
     db.insert(user.id, user.email, publicKeyAsString, privateKeyAsString)
       .then(() => {
-        user.publicKey = publicKeyAsString;
-        user.privateKey = privateKeyAsString;
+        user.setKeys(publicKeyAsString, privateKeyAsString);
         resolve();
       })
       .catch(err => {
         reject(err);
       });
   });
-
 }
