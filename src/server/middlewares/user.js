@@ -15,7 +15,6 @@ class User {
   setKeys (publicKey, privateKey) {
     this.publicKey = Buffer.from(publicKey, 'hex');
     this.privateKey = Buffer.from(privateKey, 'hex');
-    console.log(this.publicKey);
   }
 
   setKeysFromDB (dbRows) {
@@ -34,7 +33,7 @@ class User {
     return {
       id: this.id,
       email: this.email,
-      publicKey: this.publicKey,
+      publicKey: this.publicKey.toString('hex'),
       feeds: this.feeds
     };
   }

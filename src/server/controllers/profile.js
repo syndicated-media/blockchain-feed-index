@@ -10,7 +10,6 @@ const set = user => {
 
 const getFeeds = user => {
   return new Promise((resolve, reject) => {
-    console.log('email: ', user.email);
     postchain.getByEmail(user.email)
       .then(feeds => {
         user.feeds = feeds;
@@ -26,8 +25,7 @@ const transferIfNeeded = user => {
 
     user.feeds.forEach(feed => {
       if (feed.publicKey !== user.publicKey) {
-        console.log('Transfering ' + feed.feedUrl);
-        transfers.push(postchain.transfer(feed.feedUrl, keys.privateKey, user.publicKey));
+        transfers.push(postchain.transfer(feed.feedUrl, keys.private, user.publicKey));
       }
     });
 
