@@ -1,9 +1,157 @@
-.main {
-  .something {
-    color: red;
-  }
-}
+$headerBackground: #ffffff;
+$brightBackground: #ffffff;
+$inputBackground: #dddddd;
+$inputBackgroundDisabled: #eeeeee;
 
-.hello {
-  color: red
+$darkFont: #000000;
+$bigFont: 50px;
+$regularFont: 16px;
+
+$logo1: rgba(246, 126, 125, 1);
+$logo2: rgba(255, 201, 181, 1);
+$logo3: rgba(26, 83, 92, 1);
+$logo4: rgba(78, 205, 196, 1);
+$logo5: rgba(38, 36, 97, 1);
+$logo6: #BFD7EA;
+$logo7: #FF5A5F;
+$logo8: #DB504A;
+
+body {
+  padding: 0px;
+  margin: 0px;
+  border: 0px;
+  font-family: 'Work Sans', sans-serif;
+  color: $darkFont;
+
+  #app {
+    .header {
+      width: 100%;
+      height: 200px;
+      background-color: $headerBackground;
+
+      .header-center-vertically {
+        font-size: $bigFont;
+        text-align: center;
+        position: relative;
+        top: 50%;
+        transform: translateY(-50%);
+
+        .P {
+          color: $logo1;
+        }
+        .O {
+          color: $logo2;
+        }
+        .D {
+          color: $logo3;
+        }
+        .C {
+          color: $logo4;
+        }
+        .H {
+          color: $logo6;
+        }
+        .A {
+          color: $logo5;
+        }
+        .I {
+          color: $logo7;
+        }
+        .N {
+          color: $logo8;
+        }
+      }
+    }
+
+    .submit {
+      width: 100%;
+      text-align: center;
+      color: $darkFont;
+      font-size: $regularFont;
+      margin-bottom: 15px;
+
+      .title {
+        margin: 10px 0px;
+      }
+
+      input[type=text] {
+        font-family: 'Work Sans', sans-serif;
+        font-weight: 700;
+        color: $darkFont;
+        width: 66%;
+        background-color: $inputBackground;
+        border: none;
+        margin: 5px;
+        padding: 10px;
+        cursor: pointer;
+        border-radius: 2px;
+      }
+      input[type=text]:focus {
+        outline: none;
+      }
+      input[type=text]:disabled {
+        background-color: $inputBackgroundDisabled;
+      }
+      input[type=submit] {
+        font-family: 'Work Sans', sans-serif;
+        color: $darkFont;
+        font-weight: 700;
+        background-color: $logo1;
+        border: none;
+        margin: 5px;
+        padding: 10px;
+        cursor: pointer;
+        border-radius: 2px;
+      }
+      input[type=submit]:hover {
+        background-color: $logo2;
+      }
+      input[type=submit]:focus {
+        outline: none;
+      }
+      input[type=submit]:disabled {
+        background-color: $inputBackgroundDisabled;
+      }
+    }
+
+    .login {
+      position: absolute;
+      bottom: 10px;
+      width: 100%;
+      text-align: center;
+      color: $darkFont;
+      font-size: $regularFont;
+
+      .login-inner {
+        width: 33%;
+        margin: 0px auto;
+
+        .separator {
+          width: 100%;
+          height: 1px;
+          background-color: $logo2;
+          margin-bottom: 15px;
+        }
+
+        .title {
+          margin: 0px 0px;
+        }
+
+        button {
+          background-color: $logo1;
+          border: none;
+          margin: 10px;
+          padding: 10px;
+          cursor: pointer;
+          border-radius: 2px;
+        }
+        button:hover {
+          background-color: $logo2;
+        }
+        button:focus {
+          outline: none;
+        }
+      }
+    }
+  }
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import {submit} from '../ducks/submit';
+import {submit, reset} from '../ducks/submit';
 import Submit from './submit';
 
 const mapStateToProps = (state) => {
@@ -18,6 +18,9 @@ const mapDispatchToProps  = (dispatch) => {
   return {
     onSubmit: (urls) => {
       dispatch (submit (urls));
+    },
+    onReset: () => {
+      dispatch (reset());
     }
   };
 }

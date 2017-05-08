@@ -1,13 +1,13 @@
-import React, { PropTypes as T } from 'react';
+import React from 'react';
 import LoginContainer from '../../components/login-container';
 
-export default React.createClass({
+export default class LoginView extends React.Component {
   render () {
     return (
       <div>
-        <h2>LOGIN</h2>
+        <div style={{textAlign: "center"}}>You need to login to manage your feeds</div>
         <LoginContainer/>
       </div>
     );
   }
-});
+}
