@@ -12,6 +12,9 @@ let router = express.Router();
 router.use(bodyParser.urlencoded({extended: false}));
 router.use(bodyParser.json());
 
+// TODO: remove, just for test
+router.post('/api/podchain/createWithoutValidation', podchain.createWithoutValidation);
+
 // podchain api
 router.get('/api/podchain/', podchain.get);
 router.post('/api/podchain/create', podchain.create);

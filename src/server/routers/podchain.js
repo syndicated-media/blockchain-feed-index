@@ -41,6 +41,26 @@ const create = (req, res) => {
     .catch(handleError(res));
 }
 
+const createWithoutValidation = (req, res) => {
+  let body = req.body;
+
+  if (body.url && body.title && body.email) {
+    podchain.create([{
+      url: body.url,
+      title: body.title,
+      email: body.email
+    }])
+      .then(handleResult(res))
+      .catch(handleError(res));
+  } else {
+    res.status(500).json({
+      message: 'Need url, title and email in body'
+    });
+  }
+}
+
+
+
 // update an entry
 const update = (req, res) => {
   let body = req.body;
@@ -59,8 +79,6 @@ const update = (req, res) => {
 }
 
 // transfer ownership of entry
-// todo: allow for wallet middleware so other than
-// initial concortium member can make transfers
 const transfer = (req, res) => {
   let body = req.body;
   let url = cleanUrl(body.url);
@@ -70,7 +88,7 @@ const transfer = (req, res) => {
     .then(removeInvalid)
     .then(validPods => {
       let pod = validPods[0];
-      return podchain.transfer(pod.url, newOwnerPublicKey);
+      return podchain.transfer(pod.url, req.user.privateKey, newOwnerPublicKey);
     })
     .then(handleResult(res))
     .catch(handleError(res));
@@ -78,15 +96,13 @@ const transfer = (req, res) => {
 
 // delete entry
 const del = (req, res) => {
-  let body = req.body;
-  let url = cleanUrl(body.url);
-  let privateKey = req.privateKey;
+  let url = cleanUrl(req.body.url);
 
   validate(url)
     .then(removeInvalid)
     .then(validPods => {
       let pod = validPods[0];
-      return podchain.del(pod.url, privateKey);
+      return podchain.del(pod.url, req.user.privateKey);
     })
     .then(handleResult(res))
     .catch(handleError(res));
@@ -95,6 +111,7 @@ const del = (req, res) => {
 module.exports = {
   get,
   create,
+  createWithoutValidation,
   update,
   transfer,
   del

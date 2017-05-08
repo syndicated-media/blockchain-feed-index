@@ -44,7 +44,7 @@ class PostchainClient {
     }
 
     getByEmail(email) {
-        return this.query({type: 'getPodcastsByEmail', email: email}, 
+        return this.query({type: 'getPodcastsByEmail', email: email},
             result => result.map(podcast => podcastObject(podcast)));
     }
 

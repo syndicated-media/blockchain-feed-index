@@ -12,9 +12,13 @@ module.exports = (req, res, next) => {
     } else {
       body = JSON.parse(body);
 
-      req.user.id = body.identities[0].user_id;
-      req.user.email = body.email;
-      next();
+      if (body.email_verified) {
+        req.user.id = body.identities[0].user_id;
+        req.user.email = body.email;
+        next();
+      } else {
+        res.status(401).send();
+      }
     }
   });
 }

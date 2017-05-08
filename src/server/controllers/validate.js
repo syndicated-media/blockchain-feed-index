@@ -25,7 +25,6 @@ const validate = (urls, response, resolve, reject) => {
       })
       .catch (result => {
         response.urls.push (result);
-//        resolve (response);
         validate (urls, response, resolve);
       });
   } else {
