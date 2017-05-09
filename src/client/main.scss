@@ -1,11 +1,13 @@
 $headerBackground: #ffffff;
 $brightBackground: #ffffff;
-$inputBackground: #dddddd;
+$inputBackground: #dddde2;
 $inputBackgroundDisabled: #eeeeee;
 
 $darkFont: #000000;
 $bigFont: 50px;
-$regularFont: 16px;
+$regularFont: 14px;
+$regularFontFamily: "Open Sans", arial, sans-serif;
+$logoFontFamily: 'Work Sans', sans-serif;
 
 $logo1: rgba(246, 126, 125, 1);
 $logo2: rgba(255, 201, 181, 1);
@@ -20,7 +22,7 @@ body {
   padding: 0px;
   margin: 0px;
   border: 0px;
-  font-family: 'Work Sans', sans-serif;
+  font-family: $regularFontFamily;
   color: $darkFont;
 
   #app {
@@ -30,6 +32,7 @@ body {
       background-color: $headerBackground;
 
       .header-center-vertically {
+        font-family: $logoFontFamily;
         font-size: $bigFont;
         text-align: center;
         position: relative;
@@ -75,8 +78,8 @@ body {
       }
 
       input[type=text] {
-        font-family: 'Work Sans', sans-serif;
-        font-weight: 700;
+        font-family: $regularFontFamily;
+        font-size: $regularFont;
         color: $darkFont;
         width: 66%;
         background-color: $inputBackground;
@@ -93,9 +96,9 @@ body {
         background-color: $inputBackgroundDisabled;
       }
       input[type=submit] {
-        font-family: 'Work Sans', sans-serif;
+        font-family: $regularFontFamily;
+        font-size: $regularFont;
         color: $darkFont;
-        font-weight: 700;
         background-color: $logo1;
         border: none;
         margin: 5px;
@@ -138,6 +141,7 @@ body {
         }
 
         button {
+          font-size: $regularFont;
           background-color: $logo1;
           border: none;
           margin: 10px;
@@ -150,6 +154,83 @@ body {
         }
         button:focus {
           outline: none;
+        }
+      }
+    }
+
+    .profile {
+      width: 100%;
+
+      .profile-inner {
+        width: 66%;
+        margin: 0px auto;
+
+        .profile-welcome {
+          width: 100%;
+          text-align: center;
+          margin-bottom: 10px;
+        }
+        .profile-info {
+          .id-and-key {
+            font-size: $regularFont;
+            font-weight: normal;
+            margin: 5px 0px;
+
+            .bold {
+              font-weight: bold;
+            }
+          }
+        }
+        .separator {
+          width: 50%;
+          margin: 20px auto;
+          height: 1px;
+          background-color: $logo2;
+        }
+      }
+    }
+
+    .feed-list {
+      .feed-entry:nth-child(odd) {
+        background-color: lighten($logo2, 10%);
+      }
+      .feed-entry:nth-child(even) {
+        background-color: lighten($logo6, 10%);
+      }
+
+      .feed-entry {
+        padding: 10px;
+        margin-bottom: 10px;
+
+        .title, .url, .id {
+          font-size: $regularFont;
+          margin-bottom: 5px;
+
+          a {
+            color: $darkFont;
+          }
+          a:hover {
+            opacity: 0.5;
+          }
+        }
+        .actions {
+          margin-top: 10px;
+
+          button {
+            font-size: $regularFont;
+            background-color: $logo1;
+            border: none;
+            margin: 0px 5px 0px 0px;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 2px;
+          }
+          button:hover {
+            background-color: $logo2;
+          }
+          button:focus {
+            outline: none;
+          }
         }
       }
     }

@@ -8,7 +8,7 @@ export default class FeedList extends React.Component {
     );
 
     return (
-      <div>
+      <div className='feed-list'>
         {entries}
       </div>
     );

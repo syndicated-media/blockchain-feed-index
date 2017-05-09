@@ -5,7 +5,6 @@ export default class ProfileView extends React.Component {
   render () {
     return (
       <div>
-        <h2>PROFILE</h2>
         <ProfileContainer/>
       </div>
     );

@@ -4,7 +4,9 @@ import Profile from './profile';
 
 const mapStateToProps = (state) => {
   return {
-    profile: state.profile
+    profile: state.profile,
+    isLoading: !state.profile.authenticated || state.profile.isFetchingProfile || state.profile.loggingIn,
+    isError: state.profile.error
   };
 }
 
