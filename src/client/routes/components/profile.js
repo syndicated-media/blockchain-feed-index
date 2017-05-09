@@ -1,13 +1,12 @@
 import React from 'react';
 import ProfileContainer from '../../components/profile-container';
 
-export default React.createClass({
+export default class ProfileView extends React.Component {
   render () {
     return (
       <div>
-        <h2>PROFILE</h2>
         <ProfileContainer/>
       </div>
     );
   }
-})
+}

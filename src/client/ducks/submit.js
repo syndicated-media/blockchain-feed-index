@@ -4,6 +4,7 @@ const VALIDATE = 'podchain/submit/VALIDATE';
 const POST_TO_PODCHAIN = 'podchain/submit/POST_TO_PODCHAIN';
 const COMPLETE = 'podchain/submit/COMPLETE';
 const ERROR = 'podchain/submit/ERROR';
+const RESET = 'podchain/submit/RESET';
 
 const initalState = {
     urls: [],
@@ -45,6 +46,16 @@ export default function reducer (state = initalState, action = {}) {
         isError: true,
         response: action.response
       };
+
+    case RESET: {
+      return {
+        ...state,
+        isPostingUrls: false,
+        isComplete: false,
+        isError: false,
+        response: ''
+      };
+    }
     default:
       return state;
   }
@@ -58,7 +69,7 @@ export function submit (urls) {
     urls = cleanUrls (urls);
 
     dispatch (init (urls));
-    dispatch (postToBlockchain);
+    dispatch (postToBlockchain());
     fetch ('/api/podchain/create', {
       headers: {
         'Content-Type': 'application/json'
@@ -68,7 +79,12 @@ export function submit (urls) {
         urls: urls
       })
     })
-      .then (response => response.json())
+      .then (response => {
+        if (!response.ok) {
+          throw new Error(response.statusText);
+        }
+        return response.json();
+      })
       .then (response => {
         dispatch (complete ('Podcast(s) succesfully submitted'));
       })
@@ -76,6 +92,12 @@ export function submit (urls) {
         dispatch (error ('Something went wrong when submitting podcast(s)'));
       });
   }
+}
+
+export function reset () {
+  return {
+    type: RESET
+  };
 }
 
 // action creators
@@ -106,6 +128,7 @@ function error (response) {
     response: response
   };
 }
+
 
 // helpers
 

@@ -5,6 +5,7 @@ const LOGOUT = 'podchain/profile/LOGIN';
 const AUTHENTICATE = 'podchain/profile/AUTHENTICATE';
 const FETCHING_PROFILE = 'podchain/profile/FETCHING_PROFILE';
 const SET_PROFILE = 'podchain/profile/SET_PROFILE';
+const ERROR = 'podchain/profile/ERROR';
 const LOCALSTORAGEKEY = 'podchain-poc-state';
 
 const authService = new AuthService('K3Cuu3SC9mlt9M3OujeVtJFRAs9MBNL5', 'podchaintest.auth0.com');
@@ -13,6 +14,7 @@ const initalState = {
     logginOut: false,
     authenticated: false,
     isFetchingProfile: false,
+    error: false,
     id: '',
     email: '',
     publicKey: '',
@@ -69,6 +71,12 @@ export default function reducer (state = initalState, action = {}) {
         auth: {}
       };
 
+    case ERROR:
+      return {
+        ...state,
+        error: true
+      };
+
     default:
       return state;
   }
@@ -101,12 +109,17 @@ export function authenticate (auth) {
         'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
       }
     })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(response.statusMessage);
+        }
+        return response.json()
+      })
       .then(profile => {
         dispatch(setProfile(profile));
       })
       .catch(error => {
-        console.log(error);
+        dispatch(error(error));
       });
   }
 }
@@ -122,6 +135,12 @@ function setProfile (profile) {
     type: SET_PROFILE,
     ...profile
   }
+}
+
+function error (error) {
+  return {
+    type: ERROR
+  };
 }
 
 export function logout () {
