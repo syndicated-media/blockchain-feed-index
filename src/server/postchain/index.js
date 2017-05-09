@@ -240,5 +240,5 @@ function podcastObject(pod) {
 }
 
 let client = new PostchainClient();
-client.setEndpointBase('http://35.157.104.6/podchain/2/');
+client.setEndpointBase('http://35.157.104.6/podchaindemo/3/');
 module.exports = client;

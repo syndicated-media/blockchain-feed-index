@@ -81,7 +81,7 @@ body {
         font-family: $regularFontFamily;
         font-size: $regularFont;
         color: $darkFont;
-        width: 66%;
+        width: 50%;
         background-color: $inputBackground;
         border: none;
         margin: 5px;
@@ -163,6 +163,7 @@ body {
 
       .profile-inner {
         width: 66%;
+        max-width: 700px;
         margin: 0px auto;
 
         .profile-welcome {
