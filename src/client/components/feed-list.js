@@ -3,8 +3,9 @@ import FeedEntry from './feed-entry';
 
 export default class FeedList extends React.Component {
   render () {
+    let {onUpdate, onTransfer, onRedirect, onDelete} = this.props;
     let entries = this.props.feeds.map(feed =>
-      <FeedEntry title={feed.title} url={feed.feedUrl} id={feed.id} key={feed.id} />
+      <FeedEntry key={feed.id} data={feed} onUpdate={onUpdate} onTransfer={onTransfer} onRedirect={onRedirect} onDelete={onDelete} />
     );
 
     return (
