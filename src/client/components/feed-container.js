@@ -5,7 +5,8 @@ import {update, redirect, transfer, del} from '../ducks/feeds';
 
 const mapStateToProps = (state) => {
   return {
-    feeds: state.feeds.list
+    feeds: state.feeds.list,
+    isBusy: state.feeds.isFetching
   };
 }
 
