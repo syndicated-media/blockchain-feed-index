@@ -29,8 +29,10 @@ if (app.get('env') == 'development') {
 
 app.get('*', client);
 
+const port = process.env.PORT || 8000;
+
 // start
-app.listen(8000, () => {
+app.listen(port, () => {
   console.log('Server running on 8000');
 
   let crypto = require('crypto');
