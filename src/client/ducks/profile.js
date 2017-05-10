@@ -102,7 +102,12 @@ export function authenticate (auth) {
       type: AUTHENTICATE,
       auth: auth
     });
+    dispatch(fetchProfile());
+  }
+}
 
+export function fetchProfile () {
+  return dispatch => {
     dispatch(fetchingProfile());
     fetch('/api/wallet/profile', {
       headers: {
@@ -117,12 +122,15 @@ export function authenticate (auth) {
       })
       .then(profile => {
         dispatch(setProfile(profile));
+        dispatch(setFeeds(profile.feeds));
       })
-      .catch(error => {
-        dispatch(error(error));
+      .catch(response => {
+        dispatch(error(response));
       });
   }
 }
+
+
 
 function fetchingProfile () {
   return {
@@ -151,6 +159,11 @@ export function logout () {
 }
 
 // helpers
+
+const setFeeds = feeds => {
+  // unfortunate dual dependency
+  return  require('./feeds').setFeeds(feeds);
+}
 
 const saveState = (state) => {
   localStorage.setItem(LOCALSTORAGEKEY, JSON.stringify(state));

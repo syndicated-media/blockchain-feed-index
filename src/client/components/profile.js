@@ -1,6 +1,6 @@
 import React from 'react';
 import LoginContainer from './login-container';
-import FeedList from './feed-list';
+import FeedContainer from './feed-container';
 
 export default class Profile extends React.Component {
   render () {
@@ -26,7 +26,7 @@ export default class Profile extends React.Component {
               <div className='id-and-key'>Your Public Key: <span className='bold'>{publicKey}</span></div>
             </div>
             <div className='separator'/>
-            <FeedList feeds={feeds}></FeedList>
+            <FeedContainer />
           </div>
           <LoginContainer/>
         </div>

@@ -22,9 +22,10 @@ const getFeeds = user => {
 const transferIfNeeded = user => {
   return new Promise((resolve, reject) => {
     let transfers = [];
+    let userPublicKey = user.publicKey.toString('hex');
 
     user.feeds.forEach(feed => {
-      if (feed.publicKey !== user.publicKey) {
+      if (feed.publicKey !== userPublicKey) {
         transfers.push(postchain.transfer(feed.feedUrl, keys.private, user.publicKey));
       }
     });
